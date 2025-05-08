@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Términos y Condiciones v2</title>
+    <style>
+        /* Estilos CSS para el dashboard */
+        :root {
+            --bg-dark: #0F0C29; /* Fondo principal oscuro (azul/púrpura profundo de las imágenes) */
+            --bg-medium: #1C1E32; /* Fondo para tarjetas o secciones (un poco más claro) */
+            --bg-light: #2C2F48; /* Un tono más claro para hover o elementos activos */
+            --text-primary: #E0E0E0; /* Texto principal claro */
+            --text-secondary: #B0B0B0; /* Texto secundario o menos importante */
+            --accent-blue: #00C9FF; /* Azul brillante para acentos (tomado de las imágenes) */
+            --accent-teal: #1CD8D2; /* Turquesa para acentos (tomado de las imágenes) */
+            --accent-purple: #6f42c1; /* Púrpura para acentos (tomado de las imágenes) */
+            --highlight-bg: rgba(0, 201, 255, 0.1); /* Fondo sutil para highlights */
+            --font-family: 'Segoe UI', 'Roboto', 'Open Sans', Arial, sans-serif; /* Fuente profesional y legible */
+            --border-radius: 8px; /* Bordes redondeados consistentes */
+            --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Sombra para profundidad */
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; /* Asegura que el footer quede abajo */
+        }
+
+        .container {
+            display: flex;
+            flex: 1; /* Ocupa el espacio restante */
+            padding: 20px;
+            gap: 20px; /* Espacio entre sidebar y content */
+        }
+
+        header {
+            background: linear-gradient(90deg, var(--accent-purple), var(--accent-blue)); /* Gradiente como en las imágenes */
+            color: white;
+            padding: 20px 30px;
+            text-align: center;
+            font-size: 1.8em;
+            font-weight: bold;
+            box-shadow: var(--box-shadow);
+        }
+
+        #sidebar {
+            width: 300px; /* Ancho fijo para la barra lateral */
+            background-color: var(--bg-medium);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow-y: auto; /* Scroll si el contenido es largo */
+            height: calc(100vh - 120px); /* Altura ajustada (considerando header y padding del body) */
+        }
+
+        #sidebar h2 {
+            color: var(--accent-teal);
+            margin-top: 0;
+            font-size: 1.4em;
+            border-bottom: 2px solid var(--accent-teal);
+            padding-bottom: 10px;
+        }
+
+        #sidebar ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #sidebar ul li {
+            margin-bottom: 10px;
+        }
+
+        #sidebar ul li .category-title {
+            font-weight: bold;
+            color: var(--accent-blue);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+            display: block; /* Para que ocupe todo el ancho */
+        }
+        #sidebar ul li .category-title:hover {
+            background-color: var(--bg-light);
+        }
+
+        #sidebar ul li .term-list {
+            list-style-type: none;
+            padding-left: 15px; /* Indentación para los términos */
+            margin-top: 5px;
+            display: none; /* Ocultar por defecto, se muestra con JS */
+        }
+        #sidebar ul li .term-list li a {
+            display: block;
+            color: var(--text-primary);
+            text-decoration: none;
+            padding: 6px 8px;
+            border-radius: 4px;
+            transition: background-color 0.3s, color 0.3s;
+            font-size: 0.95em;
+        }
+
+        #sidebar ul li .term-list li a:hover, 
+        #sidebar ul li .term-list li a.active { /* Estilo para el término activo */
+            background-color: var(--accent-blue);
+            color: var(--bg-dark); /* Texto oscuro sobre fondo claro para contraste */
+        }
+
+
+        #content-area {
+            flex: 1; /* Ocupa el espacio restante */
+            background-color: var(--bg-medium);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow-y: auto; /* Scroll si el contenido es largo */
+            height: calc(100vh - 120px); /* Altura ajustada */
+        }
+        
+        #content-area .term-details { /* Contenedor de los detalles del término */
+            display: none; /* Ocultar por defecto, mostrar al seleccionar término */
+        }
+
+        .term-details h2 { /* Título del término seleccionado */
+            color: var(--accent-teal);
+            font-size: 1.5em;
+            margin-top: 0; /* Ajustado ya que es el primer elemento visible */
+            margin-bottom: 15px;
+        }
+        
+        .term-details h3 { /* Para subtítulos como "Descripción", "Puntos Clave", etc. */
+            color: var(--accent-purple);
+            font-size: 1.2em;
+            margin-top: 20px;
+            margin-bottom: 8px;
+            border-left: 4px solid var(--accent-purple);
+            padding-left: 10px;
+        }
+
+        .term-details p, .term-details ul {
+            margin-bottom: 15px;
+            color: var(--text-secondary);
+            background-color: var(--bg-dark); /* Fondo ligeramente diferente para el texto para destacarlo */
+            padding: 15px;
+            border-radius: var(--border-radius);
+        }
+
+        .term-details ul {
+            list-style-type: none; 
+            padding-left: 0; /* Removido padding por defecto de ul */
+        }
+        .term-details ul li {
+            padding-left: 20px; /* Espacio para el marcador personalizado */
+            position: relative; /* Para posicionar el marcador */
+            margin-bottom: 8px; /* Espacio entre ítems de lista */
+        }
+        .term-details ul li::before {
+            content: '▹'; /* Marcador de lista personalizado (puede ser '✓', '•', etc.) */
+            color: var(--accent-teal);
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        /* Estilos para las secciones de Highlight y Recomendación */
+        .highlight-section, .recommendation-section {
+            padding: 15px;
+            margin-top: 20px; /* Espacio antes de la sección */
+            margin-bottom: 20px;
+            border-radius: var(--border-radius);
+            border-left: 5px solid; /* Borde lateral distintivo */
+        }
+
+        .highlight-section {
+            border-left-color: var(--accent-blue);
+            background-color: var(--highlight-bg); /* Fondo sutil */
+        }
+        .highlight-section h3 { /* Ajuste para que el color del texto del h3 sea el del acento */
+            color: var(--accent-blue) !important; /* Sobrescribir el color púrpura general de h3 */
+            border-left: none; /* Quitar el borde izquierdo general de h3 si no se desea aquí */
+            padding-left: 0;
+        }
+
+        .recommendation-section {
+            border-left-color: var(--accent-teal);
+            background-color: rgba(28, 216, 210, 0.1); /* Fondo sutil con color turquesa */
+        }
+         .recommendation-section h3 { /* Ajuste para que el color del texto del h3 sea el del acento */
+            color: var(--accent-teal) !important; /* Sobrescribir el color púrpura general de h3 */
+            border-left: none;
+            padding-left: 0;
+        }
+        
+        #welcome-message { /* Mensaje de bienvenida centrado */
+            text-align: center;
+            padding: 50px 20px;
+        }
+        #welcome-message h1 {
+            font-size: 2em;
+            color: var(--accent-teal);
+        }
+        #welcome-message p {
+            font-size: 1.2em;
+            color: var(--text-secondary);
+        }
+
+        footer {
+            text-align: center;
+            padding: 15px;
+            background-color: var(--bg-medium);
+            color: var(--text-secondary);
+            font-size: 0.9em;
+            border-top: 1px solid var(--bg-light); /* Línea sutil de separación */
+        }
+
+        /* Ajustes responsivos */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column; /* Apila los elementos en pantallas pequeñas */
+            }
+            #sidebar {
+                width: 100%; /* Ocupa todo el ancho */
+                height: auto; /* Altura automática */
+                margin-bottom: 20px;
+                max-height: 300px; /* Limita altura y permite scroll si es necesario */
+            }
+            #content-area {
+                height: auto; /* Altura automática */
+            }
+            header {
+                font-size: 1.5em;
+                padding: 15px 20px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        TÉRMINOS, CONDICIONES Y PRIVACIDAD
+    </header>
+
+    <div class="container">
+        <aside id="sidebar">
+            <h2>Navegación</h2>
+            <ul id="category-list">
+                </ul>
+        </aside>
+
+        <main id="content-area">
+            <div id="welcome-message">
+                <h1>Bienvenido al Dashboard Interactivo</h1>
+                <p>Selecciona una categoría y un término de la barra lateral para ver los detalles.</p>
+                <p style="font-size: 0.9em; color: var(--text-secondary); margin-top: 30px;">
+                    Actualmente se muestran datos de ejemplo. Para usar tus propios datos,
+                    debes editar el script dentro de este archivo HTML y reemplazar la variable <code>terminosData</code>.
+                </p>
+            </div>
+            <div id="term-content" class="term-details">
+                <h2 id="term-title-main"></h2>
+                
+                <div id="term-description-section">
+                    <h3>Descripción Completa</h3>
+                    <p id="term-description"></p>
+                </div>
+
+                <div id="term-highlight-section" class="highlight-section" style="display:none;">
+                    <h3>Puntos Clave</h3>
+                    <ul id="term-highlight"></ul>
+                </div>
+
+                <div id="term-recommendation-section" class="recommendation-section" style="display:none;">
+                    <h3>Recomendaciones</h3>
+                    <ul id="term-recommendation"></ul>
+                </div>
+                
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        Dashboard de Términos y Condiciones &copy; 2024
+    </footer>
+
+    <script>
+        // --- INICIO: DATOS DE TÉRMINOS Y CONDICIONES ---
+        // Estos son datos de ejemplo porque el procesamiento del CSV falló o no se pudo acceder al archivo.
+        // Reemplázalos con tus datos en formato de array de objetos JavaScript si es necesario.
+        // Asegúrate de que las propiedades (ID, Categoria, Termino, etc.) coincidan.
+        const terminosData = [
+            {
+                "ID": "1",
+                "Categoria": "General",
+                "Subcategoria": "Aceptación de Términos",
+                "Termino": "Acuerdo Vinculante",
+                "Descripcion": "Al acceder o utilizar nuestros servicios, usted acepta estar sujeto a estos términos y condiciones. Si no está de acuerdo con alguna parte de los términos, no podrá acceder al servicio.",
+                "Highlight": "Es crucial leer y entender estos términos antes de usar el servicio.\nEl uso implica aceptación.",
+                "Recomendacion": "Guarde una copia de estos términos para su referencia.\nRevise periódicamente si hay actualizaciones."
+            },
+            {
+                "ID": "2",
+                "Categoria": "Uso del Servicio",
+                "Subcategoria": "Cuentas de Usuario",
+                "Termino": "Registro de Cuenta",
+                "Descripcion": "Para acceder a ciertas funciones del servicio, es posible que deba registrarse para obtener una cuenta. Debe proporcionar información precisa, actual y completa durante el proceso de registro y actualizar dicha información para mantenerla precisa, actual y completa.",
+                "Highlight": "La información de registro debe ser veraz y actualizada.\nUsted es responsable de la seguridad de su cuenta.",
+                "Recomendacion": "Use contraseñas seguras y únicas.\nNo comparta los detalles de su cuenta."
+            },
+            {
+                "ID": "3",
+                "Categoria": "Privacidad",
+                "Subcategoria": "Recopilación de Datos",
+                "Termino": "Información Recopilada",
+                "Descripcion": "Recopilamos información que usted nos proporciona directamente (nombre, correo, etc.) e información que se recopila automáticamente (datos de uso, cookies).",
+                "Highlight": "Se recopilan datos personales y de uso.\nLas cookies se utilizan para mejorar la experiencia.",
+                "Recomendacion": "Revise la política de privacidad para detalles.\nAjuste la configuración de cookies en su navegador."
+            }
+            // Agrega más objetos aquí según tu CSV si lo conviertes manualmente
+        ];
+        // --- FIN: DATOS DE TÉRMINOS Y CONDICIONES ---
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elementos del DOM
+            const categoryList = document.getElementById('category-list');
+            const termContentDiv = document.getElementById('term-content');
+            const welcomeMessageDiv = document.getElementById('welcome-message');
+            
+            const termTitleMain = document.getElementById('term-title-main');
+            const termDescription = document.getElementById('term-description');
+            
+            const descriptionSection = document.getElementById('term-description-section');
+            const highlightSection = document.getElementById('term-highlight-section');
+            const termHighlightList = document.getElementById('term-highlight');
+            
+            const recommendationSection = document.getElementById('term-recommendation-section');
+            const termRecommendationList = document.getElementById('term-recommendation');
+
+            // Agrupar términos por Categoría
+            const groupedTerms = terminosData.reduce((acc, term) => {
+                const categoryKey = term.Categoria;
+                if (!acc[categoryKey]) {
+                    acc[categoryKey] = [];
+                }
+                acc[categoryKey].push(term);
+                return acc;
+            }, {});
+
+            // Poblar la barra lateral de navegación
+            for (const categoryName in groupedTerms) {
+                const categoryItem = document.createElement('li');
+                
+                const categoryTitle = document.createElement('span');
+                categoryTitle.className = 'category-title';
+                categoryTitle.textContent = categoryName;
+                categoryItem.appendChild(categoryTitle);
+
+                const termListUl = document.createElement('ul');
+                termListUl.className = 'term-list';
+
+                groupedTerms[categoryName].forEach(term => {
+                    const termListItem = document.createElement('li');
+                    const termLink = document.createElement('a');
+                    termLink.href = '#term-' + term.ID; // Enlace ancla para posible navegación directa
+                    
+                    // Texto del enlace: Subcategoría (si existe y es útil) + Término
+                    let linkText = term.Termino;
+                    if (term.Subcategoria && term.Subcategoria.toLowerCase() !== term.Termino.toLowerCase()) {
+                        linkText = `${term.Subcategoria}: ${term.Termino}`;
+                    }
+                    termLink.textContent = linkText;
+                    termLink.dataset.termId = term.ID; // Usar ID para encontrar el término
+
+                    termLink.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        displayTerm(term.ID);
+                        // Marcar como activo el enlace clickeado
+                        document.querySelectorAll('#sidebar .term-list li a').forEach(a => a.classList.remove('active'));
+                        this.classList.add('active');
+                    });
+
+                    termListItem.appendChild(termLink);
+                    termListUl.appendChild(termListItem);
+                });
+                categoryItem.appendChild(termListUl);
+                categoryList.appendChild(categoryItem);
+
+                // Funcionalidad para expandir/colapsar lista de términos por categoría
+                categoryTitle.addEventListener('click', function() {
+                    const currentlyVisible = termListUl.style.display === 'block';
+                    termListUl.style.display = currentlyVisible ? 'none' : 'block';
+                     // Opcional: colapsar otras categorías abiertas
+                    if (!currentlyVisible) {
+                        document.querySelectorAll('#sidebar .term-list').forEach(list => {
+                            if (list !== termListUl) {
+                                // list.style.display = 'none'; // Descomentar para auto-colapsar otras
+                            }
+                        });
+                    }
+                });
+            }
+            
+            // Función para mostrar los detalles de un término seleccionado
+            function displayTerm(termId) {
+                const term = terminosData.find(t => String(t.ID) === String(termId));
+                if (!term) {
+                    console.error("Término no encontrado con ID:", termId);
+                    return;
+                }
+
+                welcomeMessageDiv.style.display = 'none'; // Ocultar mensaje de bienvenida
+                termContentDiv.style.display = 'block';  // Mostrar área de contenido del término
+
+                termTitleMain.textContent = term.Termino; // Mostrar título del término
+                
+                // Sección de Descripción
+                if (term.Descripcion && term.Descripcion.trim() !== "") {
+                    descriptionSection.style.display = 'block';
+                    termDescription.innerHTML = term.Descripcion.replace(/\n/g, '<br>'); // Reemplazar saltos de línea por <br>
+                } else {
+                    descriptionSection.style.display = 'none';
+                }
+
+                // Función auxiliar para poblar listas (Highlights, Recomendaciones)
+                function populateList(listElement, sectionElement, dataString) {
+                    if (dataString && dataString.trim() !== "") {
+                        sectionElement.style.display = 'block';
+                        listElement.innerHTML = ''; // Limpiar contenido anterior
+                        const items = dataString.split(/[\n;]/) // Dividir por salto de línea o punto y coma
+                                          .map(item => item.trim())
+                                          .filter(item => item); // Filtrar vacíos
+                        
+                        if (items.length > 0) {
+                            items.forEach(itemText => {
+                                const li = document.createElement('li');
+                                li.textContent = itemText;
+                                listElement.appendChild(li);
+                            });
+                        } else if (dataString.trim()) { // Si no hay separadores pero hay texto
+                             const li = document.createElement('li');
+                             li.textContent = dataString.trim();
+                             listElement.appendChild(li);
+                        } else {
+                             sectionElement.style.display = 'none'; // Ocultar si no hay items
+                        }
+                    } else {
+                        sectionElement.style.display = 'none'; // Ocultar si no hay datos
+                    }
+                }
+
+                // Poblar Puntos Clave (Highlights)
+                populateList(termHighlightList, highlightSection, term.Highlight);
+
+                // Poblar Recomendaciones
+                populateList(termRecommendationList, recommendationSection, term.Recomendacion);
+                
+                // Scroll al inicio del contenido del término para mejor UX
+                termContentDiv.scrollTop = 0;
+            }
+        });
+    </script>
+
+</body>
+</html>
